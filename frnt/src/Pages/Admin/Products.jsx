@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import AdminMenu from "../../components/Layout/AdminMenu";
 import Layout from "../../components/Layout/Layout";
 import axios from "axios";
 import { Carousel } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../context/AuthProvider";
 
 function Products() {
   const webUrl = process.env.URL || "http://localhost:7894";
   const [products, setProducts] = useState([]);
+  const { auth } = useContext(AuthContext);
 
   const getAllProducts = async () => {
     try {
-      const data = await axios.get(`${webUrl}/product/all-products`);
+      const data = await axios.get(`${webUrl}/product/all/products`, {
+        headers: {
+          Authorization: `Bearer ${auth?.token}`,
+        },
+      });
+
       setProducts(data.data.data);
     } catch (error) {
       console.log(error, "error in fetching the products ");

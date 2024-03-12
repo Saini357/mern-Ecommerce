@@ -15,7 +15,7 @@ function ProductForm() {
 
   const getAllCategories = async () => {
     try {
-      const { data } = await axios.get(`${webUrl}/category/all-categories`);
+      const { data } = await axios.get(`${webUrl}/category/all`);
       if (data.success) {
         setCategories(data.data);
       }

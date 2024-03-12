@@ -92,11 +92,17 @@ function UpdateProduct() {
     const getSingleProduct = async () => {
       try {
         const { data } = await axios.get(
-          `${webUrl}/product/single/${params.slug}`
+          `${webUrl}/product/single/${params.slug}`,
+          {
+            headers: {
+              Authorization: `Bearer ${auth?.token}`,
+            },
+          }
         );
-
-        if (data.data.length > 0) {
-          const item = data.data[0];
+        // console.log(data.data, "ddddddddddddddd");
+        if (data.data) {
+          const item = data.data;
+          console.log(item);
           setProduct({
             ...product,
             name: item.name,
@@ -117,7 +123,7 @@ function UpdateProduct() {
 
     const getAllCategories = async () => {
       try {
-        const { data } = await axios.get(`${webUrl}/category/all-categories`);
+        const { data } = await axios.get(`${webUrl}/category/all`);
         if (data.success) {
           setCategories(data.data);
         }
