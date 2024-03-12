@@ -23,11 +23,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(fileupload());
 app.use(cors());
 
+// Serve the public folder as a static directory
+app.use(express.static("public"));
+
 // Routes
 app.use("/", Route);
 app.use("/category", CategoryRoute);
 app.use("/product", ProductRoute);
-
 
 // Start the server
 app.listen(PORT, () => {

@@ -2,18 +2,19 @@ const Product = require("../modals/productModal");
 const { Validator } = require("node-input-validator");
 const { MultiplefileUpload } = require("../helpers/image_upload");
 const image = require("../helpers/image_delete");
+const slugify = require("slugify");
 
 const createProduct = async (req, res) => {
   try {
-    const { title, quantity, description, price, category } = req.body;
-    const existingProduct = await Product.findOne({ title: title });
+    const { name, quantity, description, price, category } = req.body;
+    const existingProduct = await Product.findOne({ name: name });
 
     if (existingProduct) {
       return res.status(409).json({ message: "Product already exists" });
     }
 
     const v = new Validator(req.body, {
-      title: "required",
+      name: "required",
       quantity: "required",
       description: "required",
       price: "required",
@@ -33,11 +34,12 @@ const createProduct = async (req, res) => {
     }
 
     const product = await Product.create({
-      title,
+      name,
       quantity,
       description,
       price,
       category,
+      slug: slugify(name),
 
       image: imagePaths,
     });
@@ -54,10 +56,10 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, quantity, description, price, category, rating } = req.body;
+    const { name, quantity, description, price, category, rating } = req.body;
 
     const v = new Validator(req.body, {
-      title: "required",
+      name: "required",
       quantity: "required",
       description: "required",
       price: "required",
@@ -71,14 +73,14 @@ const updateProduct = async (req, res) => {
     let imagePaths = [];
     let pics = req.files && req.files.image;
     if (pics) {
-      imagePaths = await MultiplefileUpload(pics, "../public/images");
+      imagePaths = await MultiplefileUpload(pics, "images");
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       {
         $set: {
-          title,
+          name,
           quantity,
           description,
           price,
@@ -127,26 +129,28 @@ const deleteProduct = async (req, res) => {
 
 const getaProduct = async (req, res) => {
   try {
-    const { id } = req.params;
-    const product = await Product.findById({ _id: id }).populate("category");
+    const { slug } = req.params;
+    const product = await Product.findOne({ slug: slug }).populate("category");
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
     res.status(200).json({
-      count: product.length,
+      count: 1,
       data: product,
     });
   } catch (error) {
-    console.log(error, "error in fetching the products");
+    console.error("Error fetching the product:", error);
     res
       .status(500)
-      .json({ message: "error during fetching the products", error: error });
+      .json({ message: "Error during fetching the product", error: error });
   }
 };
 
 const getAllProducts = async (req, res) => {
   try {
-    const allProducts = await Product.where("category").equals(
-      req.query.category
-    );
+    const allProducts = await Product.find();
     res.status(200).json({
       count: allProducts.length,
       data: allProducts,

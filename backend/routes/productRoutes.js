@@ -22,7 +22,7 @@ router.get(
   Product.getAllProducts
 );
 router.get(
-  "/products/:id",
+  "/single/:slug",
   middleware.authMiddleware,
   middleware.adminAuthMiddleWare,
   Product.getaProduct
